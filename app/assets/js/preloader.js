@@ -22,8 +22,8 @@ ConfigManager.load()
 DistroAPI['commonDir'] = ConfigManager.getCommonDirectory()
 DistroAPI['instanceDir'] = ConfigManager.getInstanceDirectory()
 
-// Load Strings
-LangLoader.setupLanguage()
+// Load Strings (Renderer Process - use config language)
+LangLoader.setupLanguageWithConfig()
 
 /**
  * 

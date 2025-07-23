@@ -86,7 +86,8 @@ const DEFAULT_CONFIG = {
         },
         launcher: {
             allowPrerelease: false,
-            dataDirectory: dataPath
+            dataDirectory: dataPath,
+            language: 'ko_KR'
         }
     },
     newsCache: {
@@ -790,4 +791,23 @@ exports.getAllowPrerelease = function(def = false){
  */
 exports.setAllowPrerelease = function(allowPrerelease){
     config.settings.launcher.allowPrerelease = allowPrerelease
+}
+
+/**
+ * Retrieve the selected language.
+ * 
+ * @param {boolean} def Optional. If true, the default value will be returned.
+ * @returns {string} The selected language.
+ */
+exports.getLanguage = function(def = false){
+    return !def ? config.settings.launcher.language : DEFAULT_CONFIG.settings.launcher.language
+}
+
+/**
+ * Set the selected language.
+ * 
+ * @param {string} language The new language.
+ */
+exports.setLanguage = function(language){
+    config.settings.launcher.language = language
 }

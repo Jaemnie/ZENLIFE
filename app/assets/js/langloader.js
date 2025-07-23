@@ -32,12 +32,48 @@ exports.queryEJS = function(id, placeHolders){
     return exports.query(`ejs.${id}`, placeHolders)
 }
 
-exports.setupLanguage = function(){
-    // Load Language Files
+exports.setupLanguage = function(selectedLanguage = 'ko_KR'){
+    // Clear any existing language data
+    lang = {}
+    
+    // Load English as base/fallback first
     exports.loadLanguage('en_US')
-    // Uncomment this when translations are ready
-    //exports.loadLanguage('xx_XX')
+    
+    // Load selected language to override English if it's not English
+    if(selectedLanguage !== 'en_US') {
+        exports.loadLanguage(selectedLanguage)
+    }
 
     // Load Custom Language File for Launcher Customizer
     exports.loadLanguage('_custom')
+}
+
+exports.reloadLanguage = function(language) {
+    // Clear current language data
+    lang = {}
+    
+    // Load English as base first
+    exports.loadLanguage('en_US')
+    
+    // Load selected language to override English if it's not English
+    if(language !== 'en_US') {
+        exports.loadLanguage(language)
+    }
+    
+    // Load Custom Language File for Launcher Customizer
+    exports.loadLanguage('_custom')
+}
+
+exports.setupLanguageWithConfig = function() {
+    try {
+        // This function is only called from renderer process
+        const ConfigManager = require('./configmanager')
+        const selectedLanguage = ConfigManager.getLanguage()
+        console.log('ConfigManager.getLanguage() returned:', selectedLanguage)
+        exports.setupLanguage(selectedLanguage)
+    } catch (error) {
+        console.log('Error loading ConfigManager, using fallback:', error)
+        // Fallback to default language if ConfigManager is not available
+        exports.setupLanguage('ko_KR')
+    }
 }

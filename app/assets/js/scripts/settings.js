@@ -1570,13 +1570,90 @@ async function prepareSettings(first = false) {
         setupSettingsTabs()
         initSettingsValidators()
         prepareUpdateTab()
+        initLanguageSelection()
+        bindLanguageSelection()
     } else {
         await prepareModsTab()
+        initLanguageSelection()
     }
     await initSettingsValues()
     prepareAccountsTab()
     await prepareJavaTab()
     prepareAboutTab()
+}
+
+/**
+ * Language Settings Functions
+ */
+
+/**
+ * Initialize language selection based on current configuration
+ */
+function initLanguageSelection(){
+    const currentLanguage = ConfigManager.getLanguage()
+    const languageSelected = document.getElementById('settingsLanguageSelected')
+    const languageOptions = document.getElementById('settingsLanguageOptions')
+    
+    // Set current selection display
+    const languageNames = {
+        'ko_KR': '한국어',
+        'en_US': 'English'
+    }
+    
+    languageSelected.innerHTML = languageNames[currentLanguage] || '한국어'
+    
+    // Mark current selection in options
+    for(let option of languageOptions.children) {
+        if(option.getAttribute('value') === currentLanguage) {
+            option.setAttribute('selected', '')
+        } else {
+            option.removeAttribute('selected')
+        }
+    }
+}
+
+/**
+ * Bind language selection functionality
+ */
+function bindLanguageSelection(){
+    const languageOptions = document.getElementById('settingsLanguageOptions')
+    const languageSelected = document.getElementById('settingsLanguageSelected')
+    
+    for(let option of languageOptions.children) {
+        option.addEventListener('click', function(e) {
+            const selectedValue = this.getAttribute('value')
+            const selectedText = this.innerHTML
+            
+            // Update display
+            languageSelected.innerHTML = selectedText
+            
+            // Remove selected attribute from all options
+            for(let sib of this.parentNode.children) {
+                sib.removeAttribute('selected')
+            }
+            
+            // Set selected attribute on clicked option
+            this.setAttribute('selected', '')
+            
+            // Save to configuration
+            ConfigManager.setLanguage(selectedValue)
+            ConfigManager.save()
+            
+            // Close dropdown
+            closeSettingsSelect()
+            
+                         // Show restart notification
+             setOverlayContent(
+                 Lang.queryJS ? Lang.queryJS('settings.languageChangedTitle') || '언어 변경됨' : '언어 변경됨',
+                 Lang.queryJS ? Lang.queryJS('settings.languageChangedDesc') || '언어 변경사항을 적용하려면 런처를 재시작해야 합니다.' : '언어 변경사항을 적용하려면 런처를 재시작해야 합니다.',
+                 '확인'
+             )
+            setOverlayHandler(() => {
+                toggleOverlay(false)
+            })
+            toggleOverlay(true)
+        })
+    }
 }
 
 // Prepare the settings UI on startup.
