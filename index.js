@@ -223,6 +223,23 @@ ipcMain.on(MSFT_OPCODE.OPEN_LOGOUT, (ipcEvent, uuid, isLastAccount) => {
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 let win
+let splashWindow
+
+function createSplashWindow() {
+    splashWindow = new BrowserWindow({
+        width: 800,
+        height: 800,
+        transparent: true,
+        frame: false,
+        alwaysOnTop: true,
+        skipTaskbar: true,
+        resizable: false,
+        icon: getPlatformIcon('SealCircle')
+    })
+
+    splashWindow.loadFile(path.join(__dirname, 'app', 'splash.html'))
+    splashWindow.center()
+}
 
 function createWindow() {
 
@@ -231,6 +248,7 @@ function createWindow() {
         height: 552,
         icon: getPlatformIcon('SealCircle'),
         frame: false,
+        show: false, // 처음에는 숨김
         webPreferences: {
             preload: path.join(__dirname, 'app', 'assets', 'js', 'preloader.js'),
             nodeIntegration: true,
@@ -248,9 +266,16 @@ function createWindow() {
 
     win.loadURL(pathToFileURL(path.join(__dirname, 'app', 'app.ejs')).toString())
 
-    /*win.once('ready-to-show', () => {
-        win.show()
-    })*/
+    // 메인 창 로딩 완료되면 스플래시를 닫고 메인 창을 표시
+    win.webContents.on('did-finish-load', () => {
+        setTimeout(() => {
+            if (splashWindow) {
+                splashWindow.close()
+                splashWindow = null
+            }
+            win.show()
+        }, 3000) // 3초 동안 스플래시 표시
+    })
 
     win.removeMenu()
 
@@ -341,8 +366,11 @@ function getPlatformIcon(filename){
     return path.join(__dirname, 'app', 'assets', 'images', `${filename}.${ext}`)
 }
 
-app.on('ready', createWindow)
-app.on('ready', createMenu)
+app.on('ready', () => {
+    createSplashWindow()
+    createWindow()
+    createMenu()
+})
 
 app.on('window-all-closed', () => {
     // On macOS it is common for applications and their menu bar
